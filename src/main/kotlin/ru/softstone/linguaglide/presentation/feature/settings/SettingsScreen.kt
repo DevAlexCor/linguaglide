@@ -3,7 +3,9 @@ package ru.softstone.linguaglide.presentation.feature.settings
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -74,7 +76,9 @@ private fun SettingsScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
             Column(
                 modifier = Modifier
+                    .verticalScroll(rememberScrollState())
                     .widthIn(max = 600.dp)
+                    .weight(1f)
             ) {
                 OutlinedTextField(
                     value = state.token,
@@ -109,7 +113,7 @@ private fun SettingsScreenContent(
                         .background(MaterialTheme.colors.surface)
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.size(16.dp))
             Row(
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()

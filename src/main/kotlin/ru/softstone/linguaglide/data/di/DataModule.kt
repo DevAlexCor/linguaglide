@@ -15,6 +15,9 @@ import ru.softstone.linguaglide.domain.repository.SettingsRepository
 import ru.softstone.linguaglide.domain.repository.SpeechRepository
 import ru.softstone.linguaglide.domain.repository.TextRepository
 import ru.softstone.linguaglide.domain.repository.TextToSpeech
+import java.nio.file.Files
+import java.nio.file.Paths
+import kotlin.io.path.pathString
 
 val dataModule = module {
     single<DataStore<Preferences>> {
@@ -39,7 +42,13 @@ val dataModule = module {
     singleOf(::EnglishTeacherAgent)
 }
 
-private fun createDataStore(producePath: () -> String): DataStore<Preferences> =
-    PreferenceDataStoreFactory.createWithPath(
-        produceFile = { producePath().toPath() }
+private fun createDataStore(producePath: () -> String): DataStore<Preferences>{
+    val userHome = System.getProperty("user.home")
+    val appDirectory = Paths.get(userHome, ".linguaglide")
+    if (!Files.exists(appDirectory)) {
+        Files.createDirectories(appDirectory)
+    }
+    return PreferenceDataStoreFactory.createWithPath(
+        produceFile = { appDirectory.resolve(producePath()).pathString.toPath() }
     )
+}

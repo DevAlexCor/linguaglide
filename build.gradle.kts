@@ -65,6 +65,12 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "LinguaGlide"
             packageVersion = "1.0.0"
+            modules("java.instrument", "java.management", "jdk.unsupported")
+            windows {
+                menu = true
+                shortcut = true
+                menuGroup = "LinguaGlide"
+            }
         }
     }
 }
