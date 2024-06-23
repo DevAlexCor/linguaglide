@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -74,6 +75,7 @@ fun MainScreen(
             onLineSelected = {
                 viewModel.onLineSelected(it)
             },
+            onShowClick = viewModel::onShowClick,
             onPlayClick = viewModel::onPlayClick,
             onExplainClick = viewModel::onExplainClick,
             onNewTextClick = viewModel::onNewTextClick,
@@ -94,6 +96,7 @@ private fun MainScreenContent(
     listState: LazyListState,
     onTypedTextChange: (TextState) -> Unit,
     onLineSelected: (Int) -> Unit,
+    onShowClick: () -> Unit = {},
     onPlayClick: () -> Unit = {},
     onExplainClick: () -> Unit = {},
     onNewTextClick: () -> Unit = {},
@@ -113,6 +116,7 @@ private fun MainScreenContent(
                     listState = listState,
                     onTypedTextChange = onTypedTextChange,
                     onLineSelected = onLineSelected,
+                    onShowClick = onShowClick,
                     onPlayClick = onPlayClick,
                     onExplainClick = onExplainClick,
                     onNewTextClick = onNewTextClick,
@@ -155,6 +159,7 @@ private fun FirstPanel(
     listState: LazyListState,
     onTypedTextChange: (TextState) -> Unit,
     onLineSelected: (Int) -> Unit,
+    onShowClick: () -> Unit = {},
     onPlayClick: () -> Unit = {},
     onExplainClick: () -> Unit = {},
     onNewTextClick: () -> Unit = {},
@@ -196,6 +201,16 @@ private fun FirstPanel(
                     .padding(16.dp)
             )
             IconButton(
+                onClick = onShowClick,
+                modifier = Modifier
+                    .wrapContentHeight()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "show"
+                )
+            }
+            IconButton(
                 onClick = onPlayClick,
                 enabled = !state.audioLoading,
                 modifier = Modifier
@@ -213,7 +228,7 @@ private fun FirstPanel(
                     .wrapContentHeight()
             ) {
                 Icon(
-                    imageVector = Icons.Default.Search,
+                    imageVector = Icons.Default.Info,
                     contentDescription = "Play"
                 )
             }
@@ -227,6 +242,7 @@ private fun PreviewItem(
     preview: PreviewItemState,
     onClick: (Int) -> Unit = {}
 ) {
+    var isReviled by remember { mutableStateOf(false) }
     Card(
         border = if (preview.isSelected) {
             BorderStroke(1.dp, MaterialTheme.colors.onSurface)
@@ -235,10 +251,24 @@ private fun PreviewItem(
         },
         modifier = modifier.clickable { onClick(preview.id) }
     ) {
-        Text(
-            text = preview.text,
-            modifier = Modifier.padding(8.dp),
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = if (isReviled) preview.text else preview.text.letterToSquare(),
+                modifier = Modifier.padding(8.dp).weight(1f),
+            )
+            IconButton(
+                onClick = {
+                    isReviled = !isReviled
+                },
+                modifier = Modifier
+                    .wrapContentHeight()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "show"
+                )
+            }
+        }
     }
 }
 
@@ -287,7 +317,7 @@ fun TrainTextField(
                     append(textState.typedText.spaceToDot())
                 }
                 withStyle(remainingPartStyle.toSpanStyle()) {
-                    append(textState.text.substring(textState.typedText.length).spaceToDot())
+                    append(textState.text.substring(textState.typedText.length).spaceToDot().letterToSquare())
                 }
             }
 
@@ -358,6 +388,10 @@ fun TrainTextField(
 
 private fun String.spaceToDot(): String {
     return replace(" ", "·")
+}
+
+private fun String.letterToSquare(): String {
+    return replace(Regex("[a-zA-Z]"), "■")
 }
 
 @Preview

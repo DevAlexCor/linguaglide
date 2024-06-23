@@ -64,7 +64,7 @@ class MainViewModel(
         if (currentLineText.contains(textState.typedText) || textState.typedText.isEmpty()) {
             state = state.copy(textState = textState)
         } else {
-            resetLine()
+            resetWord()
         }
     }
 
@@ -123,6 +123,17 @@ class MainViewModel(
                 positiveButton = "OK",
             )
         }
+    }
+
+    fun onShowClick() {
+        val textToShow = if (state.textState.selectedRange != null) {
+            val selectedRange = state.textState.selectedRange!!
+            val selectedText = state.textState.text.substring(selectedRange.first, selectedRange.second)
+            selectedText
+        } else {
+            "Nothing is selected"
+        }
+        state = state.copy(chatText = textToShow)
     }
 
     fun onPlayClick() {
@@ -192,16 +203,24 @@ class MainViewModel(
         val text = textRepository.getText()
         if (text.isNotBlank()) {
             textLines = text.split("\n")
-                .map { "$it " } // add space for natural transition between lines when typing
+                .map { "${it.trim()} " } // add space for natural transition between lines when typing
             selectLine(0)
         }
     }
 
-    private fun resetLine() {
+    private fun resetWord() {
+        val typed = state.textState.typedText
+        // remove last word
+        val lastSpaceIndex = typed.lastIndexOf(" ")
+        val newTyped = if (lastSpaceIndex != -1) {
+            typed.substring(0, lastSpaceIndex + 1)
+        } else {
+            ""
+        }
         state = state.copy(
             textState = TextState(
                 text = textLines[selectedLine],
-                typedText = "",
+                typedText = newTyped,
                 selectedRange = null
             )
         )
