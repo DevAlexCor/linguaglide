@@ -17,6 +17,7 @@ import org.koin.compose.KoinContext
 import org.koin.core.context.GlobalContext.startKoin
 import ru.softstone.linguaglide.data.di.dataModule
 import ru.softstone.linguaglide.presentation.di.presentationModule
+import ru.softstone.linguaglide.presentation.feature.dictation.DictationScreen
 import ru.softstone.linguaglide.presentation.feature.main.MainScreen
 import ru.softstone.linguaglide.presentation.feature.prepare.PrepareTextScreen
 import ru.softstone.linguaglide.presentation.feature.settings.SettingsScreen
@@ -52,12 +53,23 @@ fun App() {
         val navController = rememberNavController()
         NavHost(
             navController = navController,
-            startDestination = NavDestination.MAIN,
+            startDestination = NavDestination.DICTATION,
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) {
             composable(route = NavDestination.MAIN) {
                 MainScreen(
+                    onNavigateToPrepareText = {
+                        navController.navigate(NavDestination.PREPARE_TEXT)
+                    },
+                    onNavigateToSettings = {
+                        navController.navigate(NavDestination.SETTINGS)
+                    }
+                )
+            }
+
+            composable(route = NavDestination.DICTATION) {
+                DictationScreen(
                     onNavigateToPrepareText = {
                         navController.navigate(NavDestination.PREPARE_TEXT)
                     },
@@ -91,4 +103,5 @@ private object NavDestination {
     const val MAIN = "main"
     const val PREPARE_TEXT = "prepare_text"
     const val SETTINGS = "settings"
+    const val DICTATION = "dictation"
 }
