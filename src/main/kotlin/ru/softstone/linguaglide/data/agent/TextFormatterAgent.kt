@@ -20,54 +20,18 @@ class TextFormatterAgent(
 ) {
     companion object {
         val DEFAULT_PROMPT = """
-                Split the following text into segments. 
-                Adjust for Readability and Natural Flow. 
-                Keep the segments short.
-                Put each segment on a new line.
-                Example:
-                User's input:
-                 ```
-                When people ask me what I do—taxi drivers, hairdressers—I tell them I
-                work in an office. In almost nine years, no one’s ever asked what kind of
-                office, or what sort of job I do there. I can’t decide whether that’s because I
-                fit perfectly with their idea of what an office worker looks like, or whether
-                people hear the phrase work in an office and automatically fill in the blanks
-                themselves—lady doing photocopying, man tapping at a keyboard. I’m not
-                complaining. I’m delighted that I don’t have to get into the fascinating
-                intricacies of accounts receivable with them. When I first started working
-                here, whenever anyone asked, I told them that I worked for a graphic design
-                company, but then they assumed I was a creative type. It became a bit boring.
-                “A couple of weeks,” I told him.
-                ```
-                Output:
-                ```
-                When people ask me what I do
-                - taxi drivers, hairdressers -
-                I tell them I work in an office.
-                In almost nine years, no one's ever asked what kind of office,
-                or what sort of job I do there.
-                I can't decide whether that's because I fit perfectly with their idea of what an office worker looks like,
-                or whether people hear the phrase work in an office
-                and automatically fill in the blanks themselves
-                - lady doing photocopying,
-                man tapping at a keyboard.
-                I'm not complaining.
-                I'm delighted that I don't have to get into the fascinating intricacies of accounts receivable with them.
-                When I first started working here,
-                whenever anyone asked,
-                I told them that I worked for a graphic design company,
-                but then they assumed I was a creative type.
-                It became a bit boring.
-                "A couple of weeks," I told him.
-                ```
+            Split the following text into segments for dictation exercise.
+            Keep the segments short, 5-10 words.
+            Put each segment on a new line.
+            One word segments are not allowed.
 
-                [no prose]
-                [no blank lines]
-                [output only the text]
+            [no prose]
+            [no blank lines]
+            [output only the text
             """.trimIndent()
     }
 
-    private val modelId = ModelId("gpt-4o")
+    private val modelId = ModelId("gpt-4o-mini")
 
     suspend fun prepareTextForTyping(text: String): Flow<String> {
         val chatMessages = listOf(

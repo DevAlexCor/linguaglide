@@ -20,13 +20,13 @@ class SpeechRepositoryImpl(
      * @param text the text to convert to speech.
      * @return the mp3 file.
      */
-    override suspend fun getMp3(text: String): File = withContext(Dispatchers.IO) {
+    override suspend fun getMp3(text: String, speed: Double): File = withContext(Dispatchers.IO) {
         mutex.withLock {
-            val fileHash = text.hashCode().toString()
+            val fileHash = "$text $speed".hashCode().toString()
             val tmpFile = File(System.getProperty("java.io.tmpdir"), "tts-$fileHash.mp3")
 
             if (!tmpFile.exists()) {
-                val byteArray = textToSpeech.generateSpeech(text)
+                val byteArray = textToSpeech.generateSpeech(text, speed)
                 FileOutputStream(tmpFile).use { fos ->
                     fos.write(byteArray)
                 }

@@ -82,7 +82,7 @@ fun App() {
             composable(route = NavDestination.PREPARE_TEXT) {
                 PrepareTextScreen(
                     onNavigateNext = {
-                        navController.navigate(NavDestination.MAIN)
+                        navController.navigate(NavDestination.DICTATION)
                     }
                 )
             }

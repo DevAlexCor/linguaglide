@@ -55,6 +55,14 @@ dependencies {
 
     // MP3 player
     implementation("javazoom:jlayer:1.0.1")
+
+    implementation("io.github.java-diff-utils:java-diff-utils:4.12")
+
+    val richtextVersion = "1.0.0-alpha01"
+    implementation("com.halilibo.compose-richtext:richtext-ui-material:${richtextVersion}")
+    implementation("com.halilibo.compose-richtext:richtext-ui:${richtextVersion}")
+    implementation("com.halilibo.compose-richtext:richtext-markdown:${richtextVersion}")
+    implementation("com.halilibo.compose-richtext:richtext-commonmark:${richtextVersion}")
 }
 
 compose.desktop {

@@ -5,17 +5,12 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class DictationState(
     val previews: List<PreviewItemState> = emptyList(),
-    val textState: TextState = TextState(),
+    val typedText: String = "",
     val chatText: String = "",
     val audioLoading: Boolean = false,
     val chatLoading: Boolean = false,
-)
-
-@Immutable
-data class TextState(
-    val text: String = "",
-    val typedText: String = "",
-    val selectedRange: Pair<Int, Int>? = null,
+    val markedText: String = "",
+    val speed: Float = 1f,
 )
 
 @Immutable

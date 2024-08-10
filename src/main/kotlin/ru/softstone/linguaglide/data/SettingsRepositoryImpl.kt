@@ -5,7 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
-import ru.softstone.linguaglide.data.agent.EnglishTeacherAgent
+import ru.softstone.linguaglide.data.agent.TeacherAgent
 import ru.softstone.linguaglide.data.agent.TextFormatterAgent
 import ru.softstone.linguaglide.domain.repository.SettingsRepository
 
@@ -31,7 +31,7 @@ class SettingsRepositoryImpl(
 
     override suspend fun getEnglishTeacherPrompt(): String {
         return dataStore.data.first()[KEY_ENGLISH_TEACHER_PROMPT]?.ifBlank { null }
-            ?: EnglishTeacherAgent.DEFAULT_PROMPT
+            ?: TeacherAgent.DEFAULT_PROMPT
     }
 
     override suspend fun saveEnglishTeacherPrompt(prompt: String) {

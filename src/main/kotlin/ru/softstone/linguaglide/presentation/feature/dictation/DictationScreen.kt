@@ -1,42 +1,35 @@
 package ru.softstone.linguaglide.presentation.feature.dictation
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.halilibo.richtext.commonmark.Markdown
+import com.halilibo.richtext.ui.material.RichText
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.HorizontalSplitPane
 import org.jetbrains.compose.splitpane.rememberSplitPaneState
@@ -46,7 +39,7 @@ import ru.softstone.linguaglide.presentation.dialog.DialogOverlay
 import ru.softstone.linguaglide.presentation.feature.dictation.model.DictationCommand
 import ru.softstone.linguaglide.presentation.feature.dictation.model.DictationState
 import ru.softstone.linguaglide.presentation.feature.dictation.model.PreviewItemState
-import ru.softstone.linguaglide.presentation.feature.dictation.model.TextState
+import java.math.RoundingMode
 
 @Composable
 fun DictationScreen(
@@ -78,6 +71,8 @@ fun DictationScreen(
             onExplainClick = viewModel::onExplainClick,
             onNewTextClick = viewModel::onNewTextClick,
             onSettingsClick = onNavigateToSettings,
+            onTextDone = viewModel::onTextDone,
+            onSpeedChange = viewModel::onSpeedChange
         )
         DialogOverlay(
             controller = viewModel.dialogDelegate,
@@ -92,19 +87,21 @@ fun DictationScreen(
 private fun DictationScreenContent(
     state: DictationState,
     listState: LazyListState,
-    onTypedTextChange: (TextState) -> Unit,
+    onTypedTextChange: (String) -> Unit,
     onLineSelected: (Int) -> Unit,
     onPlayClick: () -> Unit = {},
     onExplainClick: () -> Unit = {},
     onNewTextClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onTextDone: () -> Unit = {},
+    onSpeedChange: (Float) -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background
     ) {
         HorizontalSplitPane(
-            splitPaneState = rememberSplitPaneState(initialPositionPercentage = 1f),
+            splitPaneState = rememberSplitPaneState(initialPositionPercentage = 0.5f),
 
             ) {
             first(360.dp) {
@@ -116,6 +113,8 @@ private fun DictationScreenContent(
                     onPlayClick = onPlayClick,
                     onExplainClick = onExplainClick,
                     onNewTextClick = onNewTextClick,
+                    onTextDone = onTextDone,
+                    onSpeedChange = onSpeedChange
                 )
             }
             second(360.dp) {
@@ -137,11 +136,11 @@ private fun DictationScreenContent(
                         }
                     }
                     SelectionContainer {
-                        Text(
-                            text = state.chatText,
-                            modifier = Modifier.padding(16.dp),
-                            style = TextStyle(fontSize = 16.sp)
-                        )
+                        RichText(
+                            modifier = Modifier.padding(16.dp).verticalScroll(rememberScrollState()),
+                        ) {
+                            Markdown(content = state.chatText)
+                        }
                     }
                 }
             }
@@ -153,18 +152,43 @@ private fun DictationScreenContent(
 private fun FirstPanel(
     state: DictationState,
     listState: LazyListState,
-    onTypedTextChange: (TextState) -> Unit,
+    onTypedTextChange: (String) -> Unit,
     onLineSelected: (Int) -> Unit,
     onPlayClick: () -> Unit = {},
     onExplainClick: () -> Unit = {},
     onNewTextClick: () -> Unit = {},
+    onTextDone: () -> Unit = {},
+    onSpeedChange: (Float) -> Unit = {}
 ) {
     Column {
-        OutlinedButton(
-            onClick = onNewTextClick,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)
         ) {
-            Text("New Text")
+            OutlinedButton(
+                onClick = onNewTextClick,
+            ) {
+                Text("New Text")
+            }
+
+            Text(
+                text = "Speed",
+                modifier = Modifier.padding(start = 16.dp),
+                style = TextStyle(fontSize = 20.sp)
+            )
+            Slider(
+                value = state.speed,
+                onValueChange = onSpeedChange,
+                valueRange = 0.25f..1f,
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .weight(1f)
+            )
+            Text(
+                text = state.speed.toBigDecimal().setScale(2, RoundingMode.HALF_UP).toString(),
+                modifier = Modifier.padding(end = 16.dp),
+                style = TextStyle(fontSize = 20.sp)
+            )
         }
         LazyColumn(
             state = listState,
@@ -180,42 +204,68 @@ private fun FirstPanel(
                 )
             }
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colors.onBackground.copy(alpha = 0.1f))
         ) {
-//            TextField(
-//                value = state.textState.typedText,
-//                textStyle = TextStyle(fontSize = 20.sp, fontFamily = FontFamily.Monospace),
-//                onValueChange = onTypedTextChange,
-//                modifier = Modifier
-//                    .wrapContentHeight()
-//                    .weight(1f)
-//                    .padding(16.dp)
-//            )
-            IconButton(
-                onClick = onPlayClick,
-                enabled = !state.audioLoading,
+            Text(
+                text = state.markedText.mark(
+                    tagStyles = listOf(
+                        TagStyle(tag = "~~", style = TextStyle(color = Color.Red)),
+                        TagStyle(tag = "**", style = TextStyle(color = Color.Green))
+                    )
+                ),
+                modifier = Modifier.padding(16.dp),
+                style = TextStyle(fontSize = 16.sp)
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .wrapContentHeight()
+                    .fillMaxWidth()
             ) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Play"
+                OutlinedTextField(
+                    value = state.typedText,
+                    textStyle = TextStyle(fontSize = 20.sp, fontFamily = FontFamily.Monospace),
+                    onValueChange = onTypedTextChange,
+                    singleLine = true,
+                    modifier = Modifier
+                        .onKeyEvent {
+                            if (it.key == Key.Enter) {
+                                if (it.type == KeyEventType.KeyUp) {
+                                    onTextDone()
+                                }
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                        .wrapContentHeight()
+                        .weight(1f)
+                        .padding(16.dp)
                 )
-            }
-            IconButton(
-                onClick = onExplainClick,
-                enabled = !state.chatLoading,
-                modifier = Modifier
-                    .wrapContentHeight()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Play"
-                )
+                IconButton(
+                    onClick = onPlayClick,
+                    enabled = !state.audioLoading,
+                    modifier = Modifier
+                        .wrapContentHeight()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Play"
+                    )
+                }
+                IconButton(
+                    onClick = onExplainClick,
+                    enabled = !state.chatLoading,
+                    modifier = Modifier
+                        .wrapContentHeight()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Play"
+                    )
+                }
             }
         }
     }
@@ -242,10 +292,36 @@ private fun PreviewItem(
     }
 }
 
-
-private fun String.spaceToDot(): String {
-    return replace(" ", "·")
+fun String.mark(tagStyles: List<TagStyle>): AnnotatedString {
+    var source = this
+    var currentTagStyle: TagStyle? = null
+    return buildAnnotatedString {
+        while (true) {
+            val tagIndex = source.indexOfAny(tagStyles.map { it.tag })
+            val substring = if (tagIndex == -1) {
+                source
+            } else {
+                source.substring(0, tagIndex)
+            }
+            val currentStyle = currentTagStyle?.style ?: TextStyle.Default
+            withStyle(currentStyle.toSpanStyle()) {
+                append(substring)
+            }
+            if (tagIndex == -1) {
+                break
+            }
+            val tagStyle = tagStyles.find { source.startsWith(it.tag, tagIndex) }
+            currentTagStyle = if (currentTagStyle != tagStyle) {
+                tagStyle
+            } else {
+                null
+            }
+            source = source.substring(tagIndex + tagStyle!!.tag.length)
+        }
+    }
 }
+
+data class TagStyle(val tag: String, val style: TextStyle)
 
 @Preview
 @Composable
@@ -260,11 +336,7 @@ fun DictationScreenPreview() {
                 PreviewItemState(id = 4, text = "Hello, World!"),
                 PreviewItemState(id = 5, text = "Hello, World!"),
             ),
-            textState = TextState(
-                text = "Hello, World!",
-                typedText = "Hello",
-                selectedRange = 3 to 7
-            )
+            typedText = "Hello, World!",
         ),
         onTypedTextChange = {},
         onLineSelected = {},

@@ -10,13 +10,14 @@ import ru.softstone.linguaglide.domain.repository.TextToSpeech
 class TextToSpeechImpl(
     private val openAIProvider: OpenAIProvider
 ) : TextToSpeech {
-    override suspend fun generateSpeech(text: String): ByteArray {
+    override suspend fun generateSpeech(text: String, speed: Double): ByteArray {
         if (text.length > 1000) error("Text is too long")
         val request = SpeechRequest(
             model = ModelId("tts-1"),
             input = text,
             responseFormat = SpeechResponseFormat.Mp3,
-            voice = Voice.Onyx,
+            voice = Voice.Alloy,
+            speed = speed
         )
         return openAIProvider.getClient().speech(request)
     }

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import ru.softstone.linguaglide.data.agent.EnglishTeacherAgent
+import ru.softstone.linguaglide.data.agent.TeacherAgent
 import ru.softstone.linguaglide.domain.repository.SettingsRepository
 import ru.softstone.linguaglide.domain.repository.SpeechRepository
 import ru.softstone.linguaglide.domain.repository.TextRepository
@@ -24,7 +24,7 @@ import ru.softstone.linguaglide.presentation.feature.main.model.TextState
 class MainViewModel(
     private val textRepository: TextRepository,
     private val speechRepository: SpeechRepository,
-    private val englishTeacherAgent: EnglishTeacherAgent,
+    private val teacherAgent: TeacherAgent,
     private val settingsRepository: SettingsRepository,
     private val audioPlayer: AudioPlayer
 ) : ViewModel(),
@@ -102,7 +102,7 @@ class MainViewModel(
             viewModelScope.launch {
                 state = state.copy(chatLoading = true)
                 try {
-                    englishTeacherAgent.explain(textToExplain).collect {
+                    teacherAgent.explain(textToExplain).collect {
                         state = state.copy(chatText = it)
                     }
                     playText(state.chatText)

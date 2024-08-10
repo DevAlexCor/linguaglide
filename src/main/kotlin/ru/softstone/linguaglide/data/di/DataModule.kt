@@ -8,7 +8,9 @@ import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import ru.softstone.linguaglide.data.*
-import ru.softstone.linguaglide.data.agent.EnglishTeacherAgent
+import ru.softstone.linguaglide.data.agent.CompletionAgent
+import ru.softstone.linguaglide.data.agent.OpenAICompletionAgent
+import ru.softstone.linguaglide.data.agent.TeacherAgent
 import ru.softstone.linguaglide.data.agent.TextFormatterAgent
 import ru.softstone.linguaglide.domain.OpenAIProvider
 import ru.softstone.linguaglide.domain.repository.SettingsRepository
@@ -39,7 +41,13 @@ val dataModule = module {
         bind<SettingsRepository>()
     }
     singleOf(::TextFormatterAgent)
-    singleOf(::EnglishTeacherAgent)
+    singleOf(::TeacherAgent)
+    factory<CompletionAgent> {
+        OpenAICompletionAgent(
+            openAIProvider = get(),
+            modelId = "gpt-4o"
+        )
+    }
 }
 
 private fun createDataStore(producePath: () -> String): DataStore<Preferences>{
